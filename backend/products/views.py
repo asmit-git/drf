@@ -1,10 +1,11 @@
-from rest_framework import generics
+from rest_framework import authentication, generics, mixins, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 # from django.http import Http404
 from django.shortcuts import get_object_or_404
 
 from .models import Product
+from .premissions import IsStaffEditorPermission
 from .serializers import ProductSerializer
 
 '''
@@ -13,6 +14,10 @@ Generic Views
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    authentication_classes = [authentication.SessionAuthentication]
+    # permission_classes = [permissions.DjangoModelPermissions]
+    # permission_classes = [IsStaffEditorPermission]
+    permission_classes = [permissions.IsAdminUser,IsStaffEditorPermission]
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
@@ -36,6 +41,7 @@ product_detail_view = ProductDetailAPIView.as_view()
 class ProductUpdateAPIView(generics.UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [permissions.DjangoModelPermissions]  # first off register the model in admin.py and model permissions for user are set from admin dashboard
     lookup_field = 'pk'
 
     def perform_update(self,serializer):
@@ -68,6 +74,45 @@ product_delete_view = ProductDestroyAPIView.as_view()
 
 # product_list_view = ProductListAPIView.as_view()
 
+'''
+Core class based views -> Genereic Views breakdown
+Mixins and Generic API View
+In case of function based view we wrote conditions however in class based view we write function
+eg: if(request=="GET") ~equivalent~ def get(self,request,*args,**kwargs):
+'''
+
+class ProductMixinView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView
+    ):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_field = 'pk'
+
+    def get(self,request,*args,**kwargs):
+        print(args,kwargs)
+        pk = kwargs.get("pk")
+        if pk is not None:
+            return self.retrieve(request,*args,**kwargs)
+        return self.list(request,*args,**kwargs)
+
+    #Create model mixins
+    def post(self,request,*args,**kwargs):
+        return self.create(request,*args,**kwargs)
+
+    def perform_create(self, serializer):
+        # serializer.save(user=self.request.user)
+        # print(serializer)
+        print(serializer.validated_data)
+        title = serializer.validated_data.get('title')
+        content = serializer.validated_data.get('content') or None
+        if content is None:
+            content = "this is done from mixins"
+        serializer.save(content=content)
+
+product_mixin_view = ProductMixinView.as_view()
 
 '''
 Function based views
