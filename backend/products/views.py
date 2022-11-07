@@ -16,11 +16,16 @@ Generic Views
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    authentication_classes = [
-        authentication.SessionAuthentication,
-        TokenAuthentication] #TokenAuthentication with changed keyword from api>>authentication.py
+    '''
+    changing default settings in cfehome>>settings.py for authentication classes we can now have permissions only and authetication
+    classes will be applied by default
+    '''
+    # authentication_classes = [
+    #     authentication.SessionAuthentication,
+    #     TokenAuthentication] #TokenAuthentication with changed keyword from api>>authentication.py
     # permission_classes = [permissions.DjangoModelPermissions]
     # permission_classes = [IsStaffEditorPermission]
+
     permission_classes = [permissions.IsAdminUser,IsStaffEditorPermission]
 
     def perform_create(self, serializer):
@@ -38,6 +43,7 @@ product_list_create_view = ProductListCreateAPIView.as_view()
 class ProductDetailAPIView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAdminUser,IsStaffEditorPermission]
     # lookup_field = 'pk' ??
 
 product_detail_view = ProductDetailAPIView.as_view()
@@ -47,6 +53,7 @@ class ProductUpdateAPIView(generics.UpdateAPIView):
     serializer_class = ProductSerializer
     permission_classes = [permissions.DjangoModelPermissions]  # first off register the model in admin.py and model permissions for user are set from admin dashboard
     lookup_field = 'pk'
+    permission_classes = [permissions.IsAdminUser,IsStaffEditorPermission]
 
     def perform_update(self,serializer):
         instance = serializer.save()
@@ -61,6 +68,7 @@ class ProductDestroyAPIView(generics.DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'pk'
+    permission_classes = [permissions.IsAdminUser,IsStaffEditorPermission]
 
     def perform_destroy(self,instance):
         #anything to do with the instance
