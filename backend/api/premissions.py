@@ -6,12 +6,15 @@ Generally DjangoModelPremission secures the action routes that is create,update 
 For List route we will have to create custom permission by overriding default in DjangoModelPremissions
 '''
 
+'''this premissions.py is moved from products>>> to api for the purpose of implementation of Mixins for permissions'''
+
+
 class IsStaffEditorPermission(permissions.DjangoModelPermissions):
     '''
     overriding the DjangoModelPermission for GET Method
     '''
     perms_map = {
-        'GET': ['%(app_label)s.view_%(model_name)s'],  #overridden code
+        'GET': ['%(app_label)s.view_%(model_name)s'],  # overridden code
         'OPTIONS': [],
         'HEAD': [],
         'POST': ['%(app_label)s.add_%(model_name)s'],

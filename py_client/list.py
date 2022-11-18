@@ -6,7 +6,7 @@ auth_endpoint = "http://127.0.0.1:8000/api/auth/"
 password = getpass()
 
 auth_response = requests.post(auth_endpoint, json={
-    'username':'cfe','password':password
+    'username':'staff','password':password
 })
 print(auth_response.json())
 

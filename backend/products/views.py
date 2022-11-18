@@ -7,13 +7,18 @@ from django.shortcuts import get_object_or_404
 from api.authentication import TokenAuthentication
 
 from .models import Product
-from .premissions import IsStaffEditorPermission
+from api.premissions import IsStaffEditorPermission
+
+from api.mixins import StaffEditorPermissionMixin
 from .serializers import ProductSerializer
 
 '''
 Generic Views
 '''
-class ProductListCreateAPIView(generics.ListCreateAPIView):
+class ProductListCreateAPIView(
+    StaffEditorPermissionMixin, #mixin permissions
+    generics.ListCreateAPIView
+    ):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     '''
@@ -26,7 +31,7 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
     # permission_classes = [permissions.DjangoModelPermissions]
     # permission_classes = [IsStaffEditorPermission]
 
-    permission_classes = [permissions.IsAdminUser,IsStaffEditorPermission]
+    # permission_classes = [permissions.IsAdminUser,IsStaffEditorPermission] #This is of no use after using permission mixin
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
